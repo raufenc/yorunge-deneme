@@ -78,8 +78,12 @@ table{width:100%;border-collapse:collapse;font-size:.85rem}td,th{padding:6px;bor
 .vsatir{background:var(--kart);border-radius:16px;padding:14px;box-shadow:var(--golge);margin:12px 0}
 .vsatir .iki{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-weight:700;margin-bottom:10px}
 .vsatir .iki div{font-size:.95rem}
-.vsatir .dort{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-.vsatir .dort .secim{padding:10px 2px;font-size:.85rem}
+.vsatir .iki .yan{background:var(--zemin);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px;border:2px solid transparent}
+.vsatir .iki .yan.secili{border-color:var(--vurgu)}
+.vsatir .iki .yan p{margin:0;flex:1}
+.vsatir .iki2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.vsatir .secim{padding:9px 4px;font-size:.82rem}
+@media (max-width:640px){.vsatir .iki{grid-template-columns:1fr}}
 .kars td.esit{color:var(--vurgu2);font-weight:900}
 </style>
 </head>
@@ -93,7 +97,7 @@ table{width:100%;border-collapse:collapse;font-size:.85rem}td,th{padding:6px;bor
   <div class="maddeler">
     <div><b>1</b><span><strong>28 kısa durum</strong> göreceksin, yaklaşık 7 dakika sürer.</span></div>
     <div><b>2</b><span>Her durumda iki öğrenci var. <strong>Doğru ya da yanlış cevap yok;</strong> iki yol da öğrencilerin gerçekten yaptığı şeyler.</span></div>
-    <div><b>3</b><span>Hangisi sana daha yakınsa onun altından <strong>"Tam ben"</strong> ya da <strong>"Biraz ben"</strong> seç.</span></div>
+    <div><b>3</b><span>Sana hangisi daha çok benziyorsa onun altından <strong>"Hep böyle"</strong> ya da <strong>"Çoğu zaman böyle"</strong> seç. İkisini de yapıyorsan, daha sık yaptığın tarafta "Çoğu zaman böyle"yi seç.</span></div>
   </div>
   <div class="kutu">
     <label class="alan" for="ad">Takma adın (isteğe bağlı; gerçek adını yazma)</label>
@@ -101,7 +105,7 @@ table{width:100%;border-collapse:collapse;font-size:.85rem}td,th{padding:6px;bor
     <label class="alan" for="sinif">Sınıfın</label>
     <select id="sinif"><option value="">Seç</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option></select>
     <label class="onay" id="onay-kutu"><input type="checkbox" id="onay"> <span>Cevaplarım takma adımla Yörünge araştırmasına gönderilsin (velimin izniyle). Gerçek ad, okul ya da iletişim bilgisi gönderilmez.</span></label>
-    <div class="ornek"><strong>Örnek:</strong> Bazı öğrenciler kahvaltıda çay içer, <em>ama</em> bazı öğrenciler süt içer. Sen hep süt içiyorsan süt tarafında "Tam ben"e, çoğu zaman süt içiyorsan "Biraz ben"e basarsın.</div>
+    <div class="ornek"><strong>Örnek:</strong> Bazı öğrenciler kahvaltıda çay içer, <em>ama</em> bazı öğrenciler süt içer. Sen hep süt içiyorsan süt tarafında <strong>"Hep böyle"</strong>yi seçersin. Bazen çay da içiyor ama çoğu zaman süt içiyorsan süt tarafında <strong>"Çoğu zaman böyle"</strong>yi seçersin.</div>
     <button class="dugme" id="basla">Başla</button>
   </div>
   <div class="veli-giris">
@@ -113,7 +117,7 @@ table{width:100%;border-collapse:collapse;font-size:.85rem}td,th{padding:6px;bor
 <section id="veli" class="gizli">
   <span class="etiket">Veli için</span>
   <h1>Çocuğunuz hakkındaki tahmininiz</h1>
-  <p style="color:var(--soluk)">Çocuğunuz testi çözmeden önce doldurun. Her satırda çocuğunuz hangi tarafa daha yakın? Tahmininiz yalnız sonuç sayfasının altındaki veli bölümünde, testin sonucuyla yan yana görünür; çocuğunuz test sırasında görmez.</p>
+  <p style="color:var(--soluk)">Çocuğunuz testi çözmeden önce doldurun. Her satırda çocuğunuza hangisi daha çok benziyor? İkisini de yapıyorsa daha sık yaptığı tarafta "Çoğu zaman böyle"yi seçin. Tahmininiz yalnız sonuç sayfasının altındaki veli bölümünde, testin sonucuyla yan yana görünür; çocuğunuz test sırasında görmez.</p>
   <div id="veli-liste"></div>
   <div class="dugmeler"><button class="dugme" id="veli-kaydet">Kaydet ve çocuğunuza verin</button><button class="dugme ikincil" id="veli-vazgec">Vazgeç</button></div>
   <p id="veli-uyari" style="color:var(--vurgu);font-weight:800"></p>
@@ -124,12 +128,12 @@ table{width:100%;border-collapse:collapse;font-size:.85rem}td,th{padding:6px;bor
   <div class="durum" id="durum"></div>
   <div class="taraflar">
     <div class="taraf" id="t-sol"><span class="kim">Bazı öğrenciler</span><p id="m-sol"></p>
-      <div class="secimler"><button class="secim tam" data-b="solTam">Tam ben</button><button class="secim" data-b="solBiraz">Biraz ben</button></div></div>
+      <div class="secimler"><button class="secim tam" data-b="solTam">Hep böyle</button><button class="secim" data-b="solBiraz">Çoğu zaman böyle</button></div></div>
     <div class="ama">AMA</div>
     <div class="taraf" id="t-sag"><span class="kim">Bazı öğrenciler ise</span><p id="m-sag"></p>
-      <div class="secimler"><button class="secim" data-b="sagBiraz">Biraz ben</button><button class="secim tam" data-b="sagTam">Tam ben</button></div></div>
+      <div class="secimler"><button class="secim tam" data-b="sagTam">Hep böyle</button><button class="secim" data-b="sagBiraz">Çoğu zaman böyle</button></div></div>
   </div>
-  <div class="alt"><button class="dugme ikincil" id="geri">← Geri</button><small>Sana daha yakın olanı seç.</small></div>
+  <div class="alt"><button class="dugme ikincil" id="geri">← Geri</button><small>İkisini de yapıyorsan daha sık yaptığını seç.</small></div>
 </section>
 
 <section id="mola" class="gizli mola">
@@ -277,7 +281,7 @@ function dokum(t, e){
   <b>Öğrenme anları (0–12):</b> Önce ${t.P} · Sırasında ${t.M} · Sonra ${t.E} → <b>${etiketYazi(e)}</b><br>
   <b>Tuzaklar (0–12, yüksek = kalıcı yol):</b> Tanıdık gelme ${t.T1} · Son gece ${t.T2} · Tek tip ${t.T3} · Aynen yazma ${t.T4}</p>`;
   $("d-veli").innerHTML = veliKarsilastir(t, e);
-  const ad = {solTam:"Sol · Tam ben", solBiraz:"Sol · Biraz ben", sagBiraz:"Sağ · Biraz ben", sagTam:"Sağ · Tam ben"};
+  const ad = {solTam:"Sol · Hep böyle", solBiraz:"Sol · Çoğu zaman", sagBiraz:"Sağ · Çoğu zaman", sagTam:"Sağ · Hep böyle"};
   $("d-tablo").innerHTML = "<tr><th>#</th><th>Ölçek</th><th>Durum</th><th>Seçim</th><th>Puan</th><th>sn</th></tr>" +
     Q.map(q => { const b = D.cevap[q.no]; return `<tr><td>${q.no}</td><td>${q.id}</td><td>${q.durum}<br><small>Sol: ${q.sol}<br>Sağ: ${q.sag}</small></td><td>${b?ad[b]:"-"}</td><td>${b?puan(q,b):"-"}</td><td>${D.sure[q.no]??"-"}</td></tr>`; }).join("");
 }
@@ -299,7 +303,7 @@ $("indir").onclick = () => {
 };
 
 /* ---- veli tahmini ---- */
-const VB = ["Tam bu","Biraz bu","Biraz bu","Tam bu"];
+const VB = ["Hep böyle","Çoğu zaman böyle","Çoğu zaman böyle","Hep böyle"];
 const kucukTR = s => s[0].toLocaleLowerCase("tr") + s.slice(1);
 let veliGecici = {};
 function girisGoster(){
@@ -312,13 +316,14 @@ function veliGoster(){
   veliGecici = Object.assign({}, D.veli || {});
   $("veli-liste").innerHTML = M.veli.map((v, i) => {
     const solDuz = i % 2 === 0, sol = solDuz ? v.duzenleyen : v.kolay, sag = solDuz ? v.kolay : v.duzenleyen;
-    return `<div class="vsatir" data-o="${v.olcek}" data-sd="${solDuz?1:0}"><div class="iki"><div>Bazı çocuklar ${kucukTR(sol)}</div><div>Bazı çocuklar ise ${kucukTR(sag)}</div></div>
-      <div class="dort">${[0,1,2,3].map(k => `<button class="secim${k===0||k===3?" tam":""}" data-k="${k}">${VB[k]}</button>`).join("")}</div></div>`;
+    const yan = (metin, k1, k2) => `<div class="yan" data-ks="${k1},${k2}"><p>${metin}</p><div class="iki2"><button class="secim tam" data-k="${k1}">${VB[k1]}</button><button class="secim" data-k="${k2}">${VB[k2]}</button></div></div>`;
+    return `<div class="vsatir" data-o="${v.olcek}" data-sd="${solDuz?1:0}"><div class="iki">${yan("Bazı çocuklar " + kucukTR(sol), 0, 1)}${yan("Bazı çocuklar ise " + kucukTR(sag), 3, 2)}</div></div>`;
   }).join("");
   document.querySelectorAll(".vsatir").forEach(r => {
     const o = r.dataset.o, sd = r.dataset.sd === "1";
     const isaretle = () => r.querySelectorAll(".secim").forEach(b => {
       const k = +b.dataset.k; b.classList.toggle("isaretli", veliGecici[o] === (sd ? 3 - k : k)); });
+    r.querySelectorAll(".yan").forEach(y => y.classList.toggle("secili", !!y.querySelector(".isaretli")));
     r.querySelectorAll(".secim").forEach(b => b.onclick = () => { const k = +b.dataset.k; veliGecici[o] = sd ? 3 - k : k; isaretle(); });
     isaretle();
   });
