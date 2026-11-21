@@ -71,6 +71,16 @@ table{width:100%;border-collapse:collapse;font-size:.85rem}td,th{padding:6px;bor
 .tablo-sar{overflow-x:auto}
 .dugmeler{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
 .mola{text-align:center;padding:40px 16px}.mola .buyuk{font-size:3rem}
+.onay{display:flex;gap:10px;align-items:flex-start;margin:16px 0 0;font-size:.95rem;cursor:pointer}
+.onay input{width:22px;height:22px;flex:0 0 22px;margin-top:2px;accent-color:var(--vurgu)}
+.veli-giris{margin-top:18px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.veli-giris span{color:var(--vurgu2);font-weight:800}
+.vsatir{background:var(--kart);border-radius:16px;padding:14px;box-shadow:var(--golge);margin:12px 0}
+.vsatir .iki{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-weight:700;margin-bottom:10px}
+.vsatir .iki div{font-size:.95rem}
+.vsatir .dort{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.vsatir .dort .secim{padding:10px 2px;font-size:.85rem}
+.kars td.esit{color:var(--vurgu2);font-weight:900}
 </style>
 </head>
 <body>
@@ -86,13 +96,27 @@ table{width:100%;border-collapse:collapse;font-size:.85rem}td,th{padding:6px;bor
     <div><b>3</b><span>Hangisi sana daha yakınsa onun altından <strong>"Tam ben"</strong> ya da <strong>"Biraz ben"</strong> seç.</span></div>
   </div>
   <div class="kutu">
-    <label class="alan" for="ad">Adın ya da takma adın (isteğe bağlı)</label>
+    <label class="alan" for="ad">Takma adın (isteğe bağlı; gerçek adını yazma)</label>
     <input id="ad" maxlength="30" autocomplete="off">
     <label class="alan" for="sinif">Sınıfın</label>
     <select id="sinif"><option value="">Seç</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option></select>
+    <label class="onay" id="onay-kutu"><input type="checkbox" id="onay"> <span>Cevaplarım takma adımla Yörünge araştırmasına gönderilsin (velimin izniyle). Gerçek ad, okul ya da iletişim bilgisi gönderilmez.</span></label>
     <div class="ornek"><strong>Örnek:</strong> Bazı öğrenciler kahvaltıda çay içer, <em>ama</em> bazı öğrenciler süt içer. Sen hep süt içiyorsan süt tarafında "Tam ben"e, çoğu zaman süt içiyorsan "Biraz ben"e basarsın.</div>
     <button class="dugme" id="basla">Başla</button>
   </div>
+  <div class="veli-giris">
+    <span id="veli-durum"></span>
+    <button class="dugme ikincil" id="veli-ac">Veliyseniz: önce tahmininizi girin (1 dakika)</button>
+  </div>
+</section>
+
+<section id="veli" class="gizli">
+  <span class="etiket">Veli için</span>
+  <h1>Çocuğunuz hakkındaki tahmininiz</h1>
+  <p style="color:var(--soluk)">Çocuğunuz testi çözmeden önce doldurun. Her satırda çocuğunuz hangi tarafa daha yakın? Tahmininiz yalnız sonuç sayfasının altındaki veli bölümünde, testin sonucuyla yan yana görünür; çocuğunuz test sırasında görmez.</p>
+  <div id="veli-liste"></div>
+  <div class="dugmeler"><button class="dugme" id="veli-kaydet">Kaydet ve çocuğunuza verin</button><button class="dugme ikincil" id="veli-vazgec">Vazgeç</button></div>
+  <p id="veli-uyari" style="color:var(--vurgu);font-weight:800"></p>
 </section>
 
 <section id="soru" class="gizli">
@@ -137,6 +161,8 @@ table{width:100%;border-collapse:collapse;font-size:.85rem}td,th{padding:6px;bor
   <details id="dokum">
     <summary>Veli için: cevap dökümü</summary>
     <div id="d-ozet"></div>
+    <div id="d-veli"></div>
+    <p id="gonder-durum" style="font-weight:800"></p>
     <div class="tablo-sar"><table id="d-tablo"></table></div>
     <div class="dugmeler"><button class="dugme" id="kopyala">Cevapları kopyala</button><button class="dugme ikincil" id="indir">Dosya olarak indir</button></div>
     <p id="kopya-not" style="color:var(--soluk);font-size:.85rem"></p>
@@ -146,15 +172,16 @@ table{width:100%;border-collapse:collapse;font-size:.85rem}td,th{padding:6px;bor
 
 </main>
 <script>
-const VERI = {"sorular": [{"no": 1, "id": "P1", "olcek": "P", "durum": "Matematik ödevinde on soru var.", "sol": "vakit kaybetmemek için hemen ilk sorudan başlar.", "sag": "başlamadan sorulara göz atıp nereden başlayacağına karar verir.", "kaliciSol": false}, {"no": 2, "id": "B11", "olcek": "T1", "durum": "Yazılıya çalışırken konuyu bir kez okudun; beş dakikan daha var.", "sol": "konuyu iyice anlamak için bir kez daha okur.", "sag": "kitabı kapatıp öğrendiklerini hatırlamaya çalışır.", "kaliciSol": false}, {"no": 3, "id": "M2", "olcek": "M", "durum": "Türkçede uzun bir metin okuyorsun.", "sol": "anlamadığı bir yer olunca durup o cümleyi anlamaya çalışır.", "sag": "hızını kesmemek için anlamasa da okumayı sürdürür.", "kaliciSol": true}, {"no": 4, "id": "B31", "olcek": "T3", "durum": "Kesir, ondalık ve yüzde için iki alıştırma kâğıdı var: birinde aynı tür sorular bir arada, ötekinde hepsi karışık.", "sol": "hangi tür olduğunu kendisi bulsun diye karışık kâğıdı seçer.", "sag": "kafası karışmasın diye aynı tür soruların bir arada olduğu kâğıdı seçer.", "kaliciSol": true}, {"no": 5, "id": "E3", "olcek": "E", "durum": "Oynadığın oyunda bir bölümü kaybettin.", "sol": "hiç oyalanmadan hemen yeniden başlar.", "sag": "önce neden kaybettiğini düşünür.", "kaliciSol": false}, {"no": 6, "id": "B22", "olcek": "T2", "durum": "Yirmi İngilizce kelimeyi bir hafta sonra bilmen gerek; toplam otuz dakikan var.", "sol": "hepsini bir arada görmek için tek oturuşta çalışır.", "sag": "aynı kelimelere üç ayrı gün onar dakika çalışır.", "kaliciSol": false}, {"no": 7, "id": "B42", "olcek": "T4", "durum": "Sosyal bilgiler kitabında bir olayın sonuçlarını anlatan paragrafı okuyorsun.", "sol": "okuyunca \"Bu neden böyle?\" diye sebebini düşünür.", "sag": "göze çarpsın diye önemli yerlerin altını renkli kalemle çizer.", "kaliciSol": true}, {"no": 8, "id": "P2", "olcek": "P", "durum": "Bir hikâye ya da yazı yazacaksın.", "sol": "yazmaya başlamadan neler yazacağını kafasında sıralar.", "sag": "aklına geldikçe yazar; yazdıkça fikir bulur.", "kaliciSol": true}, {"no": 9, "id": "B13", "olcek": "T1", "durum": "Kısa bir anlatım videosu izledin; her şey anlaşılır geldi. Beş dakikan daha var.", "sol": "videoyu kapatıp aklında kalanları hatırlamaya çalışır.", "sag": "unutmamak için videoyu yeniden izler.", "kaliciSol": true}, {"no": 10, "id": "M4", "olcek": "M", "durum": "Bir yazılı sınavda soruları çözüyorsun.", "sol": "dikkati dağılmasın diye saate bakmadan çözer.", "sag": "hızını ayarlamak için ara ara saate bakar.", "kaliciSol": false}, {"no": 11, "id": "B32", "olcek": "T3", "durum": "Test kitabında hem konu konu testler hem de birkaç konunun karıştığı \"tarama\" testleri var.", "sol": "konuları ayrı ayrı çalışmak için konu testlerini çözer.", "sag": "kendini denemek için konuların karıştığı testleri çözer.", "kaliciSol": false}, {"no": 12, "id": "E1", "olcek": "E", "durum": "Matematik ödevini bitirdin.", "sol": "bitirince en çok zorlandığı soruya bir daha bakar.", "sag": "kalan vakti öbür ödeve ayırmak için defteri kapatır.", "kaliciSol": true}, {"no": 13, "id": "B25", "olcek": "T2", "durum": "Matematikte yeni kurallar öğrendin; bu hafta bir saat çalışabilirsin.", "sol": "aynı kurallara üç gün yirmişer dakika çalışır.", "sag": "kurallar bölünmesin diye bir saati tek oturuşta çalışır.", "kaliciSol": true}, {"no": 14, "id": "B34", "olcek": "T3", "durum": "Alan hesabı için iki kâğıt var: biri şekillere göre sıralı, öteki karışık.", "sol": "düzenli ilerlemek için şekillere göre sıralı kâğıdı seçer.", "sag": "formülleri ayırt etmek için şekillerin karışık geldiği kâğıdı seçer.", "kaliciSol": false}, {"no": 15, "id": "B26", "olcek": "T2", "durum": "Derste öğrendiğin bir konuya bu hafta toplam kırk dakika ayıracaksın.", "sol": "aynı konuya dört gün onar dakika çalışır.", "sag": "konu dağılmasın diye kırk dakikayı tek seferde çalışır.", "kaliciSol": true}, {"no": 16, "id": "E2", "olcek": "E", "durum": "Yazılı kâğıdın sana gösterildi.", "sol": "yanlış yaptığı soruların nedenine bakar.", "sag": "yeni konuya odaklanmak için yalnızca notuna bakar.", "kaliciSol": true}, {"no": 17, "id": "B41", "olcek": "T4", "durum": "Fen kitabın açıkken bir konunun özetini çıkaracaksın.", "sol": "eksik kalmasın diye önemli cümleleri aynen defterine yazar.", "sag": "anladığı şekilde konuyu kendi cümleleriyle yazar.", "kaliciSol": false}, {"no": 18, "id": "P6", "olcek": "P", "durum": "Öğretmen yeni bir ödev verdi; yönergesi biraz uzun.", "sol": "başlamadan ne istendiğini iyice anladığından emin olur.", "sag": "vakit kaybetmemek için yönergeye göz gezdirip hemen başlar.", "kaliciSol": true}, {"no": 19, "id": "B12", "olcek": "T1", "durum": "Yeni İngilizce kelimelere bir kez baktın; on dakikan daha var.", "sol": "Türkçe anlamları kapatıp kelimeleri hatırlamaya çalışır.", "sag": "iyice otursun diye listeyi birkaç kez okur.", "kaliciSol": true}, {"no": 20, "id": "M1", "olcek": "M", "durum": "Uzun bir matematik problemini çözüyorsun.", "sol": "kafası karışmasın diye seçtiği yoldan sonuna kadar gider.", "sag": "her adımda bulduğu sayının mantıklı olup olmadığına bakar.", "kaliciSol": false}, {"no": 21, "id": "B39", "olcek": "T3", "durum": "Fen dersinde katı, sıvı ve gaz örneklerini ayırt etmeyi çalışıyorsun; iki alıştırma var: biri hâllere göre sıralı, öteki karışık.", "sol": "hangi hâl olduğunu ayırt etmek için karışık alıştırmayı seçer.", "sag": "her hâli tek tek görmek için sıralı alıştırmayı seçer.", "kaliciSol": true}, {"no": 22, "id": "E4", "olcek": "E", "durum": "Bir hikâye ya da yazı yazmayı bitirdin.", "sol": "ilk hâlini çok beğendiği için olduğu gibi teslim eder.", "sag": "teslim etmeden önce baştan okuyup nasıl olduğuna bakar.", "kaliciSol": false}, {"no": 23, "id": "B27", "olcek": "T2", "durum": "Bir hafta sonra okulda bir şiir okuyacaksın; toplam yarım saat çalışacaksın.", "sol": "şiir bölünmesin diye yarım saati tek seferde çalışır.", "sag": "şiire üç ayrı gün onar dakika çalışır.", "kaliciSol": false}, {"no": 24, "id": "B46", "olcek": "T4", "durum": "Fen kitabında bir deneyin nasıl yapıldığı adım adım anlatılıyor.", "sol": "hiçbir adım kaçmasın diye adımları aynen defterine yazar.", "sag": "her adımın neden yapıldığını kendi cümlesiyle not alır.", "kaliciSol": false}, {"no": 25, "id": "P4", "olcek": "P", "durum": "Bu akşam üç dersten ödevin var.", "sol": "sıra seçmekle oyalanmadan ilk bulduğu ödevle başlar.", "sag": "önce hangi ödevi hangi sırayla yapacağına karar verir.", "kaliciSol": false}, {"no": 26, "id": "B16", "olcek": "T1", "durum": "Fen dersindeki tanımları bir kez okudun; beş dakikan daha var.", "sol": "tanımları defterden birkaç kez dikkatle okur.", "sag": "defteri kapatıp tanımları hatırlamaya çalışır.", "kaliciSol": false}, {"no": 27, "id": "M5", "olcek": "M", "durum": "Beden eğitiminde yeni bir hareketi deniyorsun.", "sol": "her denemede yanlış giden yeri fark edip düzeltir.", "sag": "vücudu alışsın diye hareketi değiştirmeden birkaç kez tekrar eder.", "kaliciSol": true}, {"no": 28, "id": "B45", "olcek": "T4", "durum": "Fen kitabında \"Kaktüslerin yaprakları diken şeklindedir.\" bilgisini okuyorsun.", "sol": "\"Neden diken şeklinde?\" diye sorup cevabını düşünür.", "sag": "aklında kalsın diye cümlenin altını çizer.", "kaliciSol": true}], "metin": {"anlar": {"P": {"ad": "Önce", "alt": "başlamadan", "guc": "İşe başlamadan ne istendiğine bakıyor, nereden başlayacağını düşünüyorsun.", "dene": "Bir dahaki işte başlamadan bir dakika dur ve kendine sor: Ne isteniyor? Nereden başlayacağım?"}, "M": {"ad": "Sırasında", "alt": "yaparken", "guc": "İş sürerken doğru gidip gitmediğine bakıyor, gerekince yolunu değiştiriyorsun.", "dene": "Bir işin ortasında bir kez dur ve kendine sor: Doğru gidiyor muyum? Anladım mı?"}, "E": {"ad": "Sonra", "alt": "bitince", "guc": "İş bitince nasıl geçtiğine, neyin işe yaradığına bakıyorsun.", "dene": "Bir iş bitince bir dakika ayır: En çok ne işime yaradı? Bir dahakine neyi değiştiririm?"}}, "dengeli": {"baslik": "Üç anı da dengeli kullanıyorsun", "metin": "Başlamadan, yaparken ve bitince; üçünde de kendine bir şeyler soruyorsun. Zor bir işte bu üç andan hangisinin sana en çok yardım ettiğini fark etmeyi dene."}, "tuzaklar": {"T1": {"ad": "Tanıdık gelme tuzağı", "ozet": "Tekrar okumak ↔ kapatıp hatırlamak", "kolay": "Tekrar okumak insana \"Bunu biliyorum\" dedirtir; ama tanıdık gelmek, hatırlamak demek değildir. Okuduktan sonra kitabı kapat ve aklında kalanları söylemeyi dene.", "arada": "Bazen kitabı kapatıp hatırlamayı deniyorsun. Bunu biraz daha sık yap: Oku, kapat, anlat.", "kalici": "Kitabı kapatıp hatırlamaya çalışıyorsun. Bilginin kalıcı olmasının en güçlü yollarından biri bu."}, "T2": {"ad": "Son gece tuzağı", "ozet": "Tek oturuş ↔ günlere bölmek", "kolay": "Hepsini bir oturuşta çalışmak o an iyi hissettirir ama çabuk unutulur. Aynı süreyi iki üç güne bölmeyi dene.", "arada": "Bazen çalışmanı günlere bölüyorsun. Bir dahakine aynı süreyi en az iki güne yay.", "kalici": "Çalışmanı günlere bölüyorsun. Böyle öğrenilen bilgi uzun süre akılda kalır."}, "T3": {"ad": "Tek tip tuzağı", "ozet": "Sıralı alıştırma ↔ karışık alıştırma", "kolay": "Aynı tür soruları art arda çözmek kolay gelir; ama sınavda sorular karışık gelir. Bir dahakine karışık alıştırmayı seç.", "arada": "Bazen karışık alıştırma yapıyorsun. Bir konuyu öğrendikten sonra karışık sorularla kendini denemeyi alışkanlık hâline getir.", "kalici": "Karışık alıştırmayı seçiyorsun. Böylece hangi soruda hangi yolu kullanacağını ayırt etmeyi öğreniyorsun."}, "T4": {"ad": "Aynen yazma tuzağı", "ozet": "Aynen yazmak ↔ kendi cümlenle, \"neden?\" diye", "kolay": "Aynen yazmak ve altını çizmek düzenli görünür ama bilgiyi derinleştirmez. Bir dahakine kendi cümlenle yaz ve \"Bu neden böyle?\" diye sor.", "arada": "Bazen kendi cümlenle yazıp \"neden?\" diye soruyorsun. Bunu biraz daha sık yap.", "kalici": "Kendi cümlenle yazıyor, \"neden?\" diye soruyorsun. Bilgiyi böyle işlemek onu anlamlı ve kalıcı yapar."}}, "durumlar": {"kolay": "Kolay yolda", "arada": "Arada", "kalici": "Kalıcı yolda"}}, "surum": "1.0-deneme"};
+const VERI = {"sorular": [{"no": 1, "id": "P1", "olcek": "P", "durum": "Matematik ödevinde on soru var.", "sol": "vakit kaybetmemek için hemen ilk sorudan başlar.", "sag": "başlamadan sorulara göz atıp nereden başlayacağına karar verir.", "kaliciSol": false}, {"no": 2, "id": "B11", "olcek": "T1", "durum": "Yazılıya çalışırken konuyu bir kez okudun; beş dakikan daha var.", "sol": "konuyu iyice anlamak için bir kez daha okur.", "sag": "kitabı kapatıp öğrendiklerini hatırlamaya çalışır.", "kaliciSol": false}, {"no": 3, "id": "M2", "olcek": "M", "durum": "Türkçede uzun bir metin okuyorsun.", "sol": "anlamadığı bir yer olunca durup o cümleyi anlamaya çalışır.", "sag": "hızını kesmemek için anlamasa da okumayı sürdürür.", "kaliciSol": true}, {"no": 4, "id": "B31", "olcek": "T3", "durum": "Kesir, ondalık ve yüzde için iki alıştırma kâğıdı var: birinde aynı tür sorular bir arada, ötekinde hepsi karışık.", "sol": "hangi tür olduğunu kendisi bulsun diye karışık kâğıdı seçer.", "sag": "kafası karışmasın diye aynı tür soruların bir arada olduğu kâğıdı seçer.", "kaliciSol": true}, {"no": 5, "id": "E3", "olcek": "E", "durum": "Oynadığın oyunda bir bölümü kaybettin.", "sol": "hiç oyalanmadan hemen yeniden başlar.", "sag": "önce neden kaybettiğini düşünür.", "kaliciSol": false}, {"no": 6, "id": "B22", "olcek": "T2", "durum": "Yirmi İngilizce kelimeyi bir hafta sonra bilmen gerek; toplam otuz dakikan var.", "sol": "hepsini bir arada görmek için tek oturuşta çalışır.", "sag": "aynı kelimelere üç ayrı gün onar dakika çalışır.", "kaliciSol": false}, {"no": 7, "id": "B42", "olcek": "T4", "durum": "Sosyal bilgiler kitabında bir olayın sonuçlarını anlatan paragrafı okuyorsun.", "sol": "okuyunca \"Bu neden böyle?\" diye sebebini düşünür.", "sag": "göze çarpsın diye önemli yerlerin altını renkli kalemle çizer.", "kaliciSol": true}, {"no": 8, "id": "P2", "olcek": "P", "durum": "Bir hikâye ya da yazı yazacaksın.", "sol": "yazmaya başlamadan neler yazacağını kafasında sıralar.", "sag": "aklına geldikçe yazar; yazdıkça fikir bulur.", "kaliciSol": true}, {"no": 9, "id": "B13", "olcek": "T1", "durum": "Kısa bir anlatım videosu izledin; her şey anlaşılır geldi. Beş dakikan daha var.", "sol": "videoyu kapatıp aklında kalanları hatırlamaya çalışır.", "sag": "unutmamak için videoyu yeniden izler.", "kaliciSol": true}, {"no": 10, "id": "M4", "olcek": "M", "durum": "Bir yazılı sınavda soruları çözüyorsun.", "sol": "dikkati dağılmasın diye saate bakmadan çözer.", "sag": "hızını ayarlamak için ara ara saate bakar.", "kaliciSol": false}, {"no": 11, "id": "B32", "olcek": "T3", "durum": "Test kitabında hem konu konu testler hem de birkaç konunun karıştığı \"tarama\" testleri var.", "sol": "konuları ayrı ayrı çalışmak için konu testlerini çözer.", "sag": "kendini denemek için konuların karıştığı testleri çözer.", "kaliciSol": false}, {"no": 12, "id": "E1", "olcek": "E", "durum": "Matematik ödevini bitirdin.", "sol": "bitirince en çok zorlandığı soruya bir daha bakar.", "sag": "kalan vakti öbür ödeve ayırmak için defteri kapatır.", "kaliciSol": true}, {"no": 13, "id": "B25", "olcek": "T2", "durum": "Matematikte yeni kurallar öğrendin; bu hafta bir saat çalışabilirsin.", "sol": "aynı kurallara üç gün yirmişer dakika çalışır.", "sag": "kurallar bölünmesin diye bir saati tek oturuşta çalışır.", "kaliciSol": true}, {"no": 14, "id": "B34", "olcek": "T3", "durum": "Alan hesabı için iki kâğıt var: biri şekillere göre sıralı, öteki karışık.", "sol": "düzenli ilerlemek için şekillere göre sıralı kâğıdı seçer.", "sag": "formülleri ayırt etmek için şekillerin karışık geldiği kâğıdı seçer.", "kaliciSol": false}, {"no": 15, "id": "B26", "olcek": "T2", "durum": "Derste öğrendiğin bir konuya bu hafta toplam kırk dakika ayıracaksın.", "sol": "aynı konuya dört gün onar dakika çalışır.", "sag": "konu dağılmasın diye kırk dakikayı tek seferde çalışır.", "kaliciSol": true}, {"no": 16, "id": "E2", "olcek": "E", "durum": "Yazılı kâğıdın sana gösterildi.", "sol": "yanlış yaptığı soruların nedenine bakar.", "sag": "yeni konuya odaklanmak için yalnızca notuna bakar.", "kaliciSol": true}, {"no": 17, "id": "B41", "olcek": "T4", "durum": "Fen kitabın açıkken bir konunun özetini çıkaracaksın.", "sol": "eksik kalmasın diye önemli cümleleri aynen defterine yazar.", "sag": "anladığı şekilde konuyu kendi cümleleriyle yazar.", "kaliciSol": false}, {"no": 18, "id": "P6", "olcek": "P", "durum": "Öğretmen yeni bir ödev verdi; yönergesi biraz uzun.", "sol": "başlamadan ne istendiğini iyice anladığından emin olur.", "sag": "vakit kaybetmemek için yönergeye göz gezdirip hemen başlar.", "kaliciSol": true}, {"no": 19, "id": "B12", "olcek": "T1", "durum": "Yeni İngilizce kelimelere bir kez baktın; on dakikan daha var.", "sol": "Türkçe anlamları kapatıp kelimeleri hatırlamaya çalışır.", "sag": "iyice otursun diye listeyi birkaç kez okur.", "kaliciSol": true}, {"no": 20, "id": "M1", "olcek": "M", "durum": "Uzun bir matematik problemini çözüyorsun.", "sol": "kafası karışmasın diye seçtiği yoldan sonuna kadar gider.", "sag": "her adımda bulduğu sayının mantıklı olup olmadığına bakar.", "kaliciSol": false}, {"no": 21, "id": "B39", "olcek": "T3", "durum": "Fen dersinde katı, sıvı ve gaz örneklerini ayırt etmeyi çalışıyorsun; iki alıştırma var: biri hâllere göre sıralı, öteki karışık.", "sol": "hangi hâl olduğunu ayırt etmek için karışık alıştırmayı seçer.", "sag": "her hâli tek tek görmek için sıralı alıştırmayı seçer.", "kaliciSol": true}, {"no": 22, "id": "E4", "olcek": "E", "durum": "Bir hikâye ya da yazı yazmayı bitirdin.", "sol": "ilk hâlini çok beğendiği için olduğu gibi teslim eder.", "sag": "teslim etmeden önce baştan okuyup nasıl olduğuna bakar.", "kaliciSol": false}, {"no": 23, "id": "B27", "olcek": "T2", "durum": "Bir hafta sonra okulda bir şiir okuyacaksın; toplam yarım saat çalışacaksın.", "sol": "şiir bölünmesin diye yarım saati tek seferde çalışır.", "sag": "şiire üç ayrı gün onar dakika çalışır.", "kaliciSol": false}, {"no": 24, "id": "B46", "olcek": "T4", "durum": "Fen kitabında bir deneyin nasıl yapıldığı adım adım anlatılıyor.", "sol": "hiçbir adım kaçmasın diye adımları aynen defterine yazar.", "sag": "her adımın neden yapıldığını kendi cümlesiyle not alır.", "kaliciSol": false}, {"no": 25, "id": "P4", "olcek": "P", "durum": "Bu akşam üç dersten ödevin var.", "sol": "sıra seçmekle oyalanmadan ilk bulduğu ödevle başlar.", "sag": "önce hangi ödevi hangi sırayla yapacağına karar verir.", "kaliciSol": false}, {"no": 26, "id": "B16", "olcek": "T1", "durum": "Fen dersindeki tanımları bir kez okudun; beş dakikan daha var.", "sol": "tanımları defterden birkaç kez dikkatle okur.", "sag": "defteri kapatıp tanımları hatırlamaya çalışır.", "kaliciSol": false}, {"no": 27, "id": "M5", "olcek": "M", "durum": "Beden eğitiminde yeni bir hareketi deniyorsun.", "sol": "her denemede yanlış giden yeri fark edip düzeltir.", "sag": "vücudu alışsın diye hareketi değiştirmeden birkaç kez tekrar eder.", "kaliciSol": true}, {"no": 28, "id": "B45", "olcek": "T4", "durum": "Fen kitabında \"Kaktüslerin yaprakları diken şeklindedir.\" bilgisini okuyorsun.", "sol": "\"Neden diken şeklinde?\" diye sorup cevabını düşünür.", "sag": "aklında kalsın diye cümlenin altını çizer.", "kaliciSol": true}], "metin": {"anlar": {"P": {"ad": "Önce", "alt": "başlamadan", "guc": "İşe başlamadan ne istendiğine bakıyor, nereden başlayacağını düşünüyorsun.", "dene": "Bir dahaki işte başlamadan bir dakika dur ve kendine sor: Ne isteniyor? Nereden başlayacağım?"}, "M": {"ad": "Sırasında", "alt": "yaparken", "guc": "İş sürerken doğru gidip gitmediğine bakıyor, gerekince yolunu değiştiriyorsun.", "dene": "Bir işin ortasında bir kez dur ve kendine sor: Doğru gidiyor muyum? Anladım mı?"}, "E": {"ad": "Sonra", "alt": "bitince", "guc": "İş bitince nasıl geçtiğine, neyin işe yaradığına bakıyorsun.", "dene": "Bir iş bitince bir dakika ayır: En çok ne işime yaradı? Bir dahakine neyi değiştiririm?"}}, "dengeli": {"baslik": "Üç anı da dengeli kullanıyorsun", "metin": "Başlamadan, yaparken ve bitince; üçünde de kendine bir şeyler soruyorsun. Zor bir işte bu üç andan hangisinin sana en çok yardım ettiğini fark etmeyi dene."}, "tuzaklar": {"T1": {"ad": "Tanıdık gelme tuzağı", "ozet": "Tekrar okumak ↔ kapatıp hatırlamak", "kolay": "Tekrar okumak insana \"Bunu biliyorum\" dedirtir; ama tanıdık gelmek, hatırlamak demek değildir. Okuduktan sonra kitabı kapat ve aklında kalanları söylemeyi dene.", "arada": "Bazen kitabı kapatıp hatırlamayı deniyorsun. Bunu biraz daha sık yap: Oku, kapat, anlat.", "kalici": "Kitabı kapatıp hatırlamaya çalışıyorsun. Bilginin kalıcı olmasının en güçlü yollarından biri bu."}, "T2": {"ad": "Son gece tuzağı", "ozet": "Tek oturuş ↔ günlere bölmek", "kolay": "Hepsini bir oturuşta çalışmak o an iyi hissettirir ama çabuk unutulur. Aynı süreyi iki üç güne bölmeyi dene.", "arada": "Bazen çalışmanı günlere bölüyorsun. Bir dahakine aynı süreyi en az iki güne yay.", "kalici": "Çalışmanı günlere bölüyorsun. Böyle öğrenilen bilgi uzun süre akılda kalır."}, "T3": {"ad": "Tek tip tuzağı", "ozet": "Sıralı alıştırma ↔ karışık alıştırma", "kolay": "Aynı tür soruları art arda çözmek kolay gelir; ama sınavda sorular karışık gelir. Bir dahakine karışık alıştırmayı seç.", "arada": "Bazen karışık alıştırma yapıyorsun. Bir konuyu öğrendikten sonra karışık sorularla kendini denemeyi alışkanlık hâline getir.", "kalici": "Karışık alıştırmayı seçiyorsun. Böylece hangi soruda hangi yolu kullanacağını ayırt etmeyi öğreniyorsun."}, "T4": {"ad": "Aynen yazma tuzağı", "ozet": "Aynen yazmak ↔ kendi cümlenle, \"neden?\" diye", "kolay": "Aynen yazmak ve altını çizmek düzenli görünür ama bilgiyi derinleştirmez. Bir dahakine kendi cümlenle yaz ve \"Bu neden böyle?\" diye sor.", "arada": "Bazen kendi cümlenle yazıp \"neden?\" diye soruyorsun. Bunu biraz daha sık yap.", "kalici": "Kendi cümlenle yazıyor, \"neden?\" diye soruyorsun. Bilgiyi böyle işlemek onu anlamlı ve kalıcı yapar."}}, "durumlar": {"kolay": "Kolay yolda", "arada": "Arada", "kalici": "Kalıcı yolda"}, "veli": [{"olcek": "P", "duzenleyen": "Bir işe başlamadan ne istendiğine bakar, plan yapar.", "kolay": "Bir işe vakit kaybetmeden hemen girişir."}, {"olcek": "M", "duzenleyen": "İş sürerken doğru gidip gitmediğini kontrol eder.", "kolay": "Başladığı yoldan durmadan sonuna kadar gider."}, {"olcek": "E", "duzenleyen": "İş bitince nasıl geçtiğine, neyin işe yaradığına bakar.", "kolay": "İş bitince hemen sıradaki işe geçer."}, {"olcek": "T1", "duzenleyen": "Ders çalışırken kitabı kapatıp hatırlamaya çalışır.", "kolay": "Ders çalışırken konuyu birkaç kez tekrar okur."}, {"olcek": "T2", "duzenleyen": "Çalışmasını birkaç güne böler.", "kolay": "Çalışmasını tek oturuşta, genelde sınavdan önceki gün yapar."}, {"olcek": "T3", "duzenleyen": "Farklı tür soruları karışık çözer.", "kolay": "Aynı tür soruları art arda çözer."}, {"olcek": "T4", "duzenleyen": "Kendi cümlesiyle yazar, \"Bu neden böyle?\" diye sorar.", "kolay": "Önemli yerleri aynen yazar ya da altını çizer."}]}, "surum": "1.0-deneme", "gonder": {"form_url": "", "alan": ""}};
 const Q = VERI.sorular, M = VERI.metin, ANAHTAR = "yorunge-deneme-v1";
 const $ = id => document.getElementById(id);
-let D = {ad:"", sinif:"", cevap:{}, sure:{}, sira:0, bitti:false, basladi:null, bitis:null};
+const BOS = () => ({ad:"", sinif:"", cevap:{}, sure:{}, sira:0, bitti:false, basladi:null, bitis:null, veli:null, onay:false, gonderildi:false});
+let D = BOS();
 let gosterim = 0;
 
 function kaydet(){ try{ localStorage.setItem(ANAHTAR, JSON.stringify(D)); }catch(e){} }
 function yukle(){ try{ const s = localStorage.getItem(ANAHTAR); if(s) D = Object.assign(D, JSON.parse(s)); }catch(e){} }
-function ekran(id){ for(const s of ["giris","soru","mola","sonuc"]) $(s).classList.toggle("gizli", s!==id); window.scrollTo(0,0); }
+function ekran(id){ for(const s of ["giris","veli","soru","mola","sonuc"]) $(s).classList.toggle("gizli", s!==id); window.scrollTo(0,0); }
 
 function puan(q, b){
   const p = {solTam:3, solBiraz:2, sagBiraz:1, sagTam:0}[b];
@@ -186,19 +213,19 @@ document.querySelectorAll(".secim").forEach(btn => btn.addEventListener("click",
 }));
 function ilerle(){
   D.sira++; kaydet();
-  if(D.sira >= Q.length){ D.bitti = true; D.bitis = new Date().toISOString(); kaydet(); sonucGoster(); return; }
+  if(D.sira >= Q.length){ D.bitti = true; D.bitis = new Date().toISOString(); kaydet(); sonucGoster(); if(D.onay && !D.gonderildi) gonder(); return; }
   if(D.sira === 14 && !D.molaGoruldu){ D.molaGoruldu = true; kaydet(); ekran("mola"); return; }
   soruGoster();
 }
 $("geri").onclick = () => { if(D.sira>0){ D.sira--; kaydet(); soruGoster(); } };
 $("devam").onclick = () => { ekran("soru"); soruGoster(); };
 $("basla").onclick = () => {
-  D.ad = $("ad").value.trim(); D.sinif = $("sinif").value; D.basladi = new Date().toISOString();
+  D.ad = $("ad").value.trim(); D.sinif = $("sinif").value; D.onay = $("onay").checked; D.basladi = new Date().toISOString();
   kaydet(); ekran("soru"); soruGoster();
 };
 $("yeniden").onclick = () => {
   if(!confirm("Cevaplar silinecek ve test baştan başlayacak. Emin misin?")) return;
-  D = {ad:"", sinif:"", cevap:{}, sure:{}, sira:0, bitti:false, basladi:null, bitis:null}; kaydet(); ekran("giris");
+  D = BOS(); kaydet(); girisGoster();
 };
 
 /* ---- puanlama ---- */
@@ -238,6 +265,7 @@ function sonucGoster(){
     return `<div class="kutu tuzak"><h3>${m.ad}</h3><div class="oz">${m.ozet}</div><span class="rozet r-${d}">${M.durumlar[d]}</span><p style="margin:.3em 0 0">${m[d]}</p></div>`;
   }).join("");
   dokum(t, e);
+  gonderDurum();
 }
 function etiketYazi(e){
   const A = M.anlar, [a,b,c] = e.sira.map(x => A[x].ad);
@@ -248,6 +276,7 @@ function dokum(t, e){
   $("d-ozet").innerHTML = `<p><b>Ad:</b> ${D.ad||"-"} · <b>Sınıf:</b> ${D.sinif||"-"} · <b>Toplam cevaplama süresi:</b> ${Math.round(sure/6)/10} dk<br>
   <b>Öğrenme anları (0–12):</b> Önce ${t.P} · Sırasında ${t.M} · Sonra ${t.E} → <b>${etiketYazi(e)}</b><br>
   <b>Tuzaklar (0–12, yüksek = kalıcı yol):</b> Tanıdık gelme ${t.T1} · Son gece ${t.T2} · Tek tip ${t.T3} · Aynen yazma ${t.T4}</p>`;
+  $("d-veli").innerHTML = veliKarsilastir(t, e);
   const ad = {solTam:"Sol · Tam ben", solBiraz:"Sol · Biraz ben", sagBiraz:"Sağ · Biraz ben", sagTam:"Sağ · Tam ben"};
   $("d-tablo").innerHTML = "<tr><th>#</th><th>Ölçek</th><th>Durum</th><th>Seçim</th><th>Puan</th><th>sn</th></tr>" +
     Q.map(q => { const b = D.cevap[q.no]; return `<tr><td>${q.no}</td><td>${q.id}</td><td>${q.durum}<br><small>Sol: ${q.sol}<br>Sağ: ${q.sag}</small></td><td>${b?ad[b]:"-"}</td><td>${b?puan(q,b):"-"}</td><td>${D.sure[q.no]??"-"}</td></tr>`; }).join("");
@@ -269,6 +298,75 @@ $("indir").onclick = () => {
   a.download = `yorunge-${(D.ad||"cevaplar").replace(/\s+/g,"-")}.json`; a.click();
 };
 
+/* ---- veli tahmini ---- */
+const VB = ["Tam bu","Biraz bu","Biraz bu","Tam bu"];
+const kucukTR = s => s[0].toLocaleLowerCase("tr") + s.slice(1);
+let veliGecici = {};
+function girisGoster(){
+  ekran("giris");
+  $("onay-kutu").classList.toggle("gizli", !(VERI.gonder && VERI.gonder.form_url));
+  $("veli-durum").textContent = D.veli ? "✓ Veli tahmini kaydedildi." : "";
+  $("veli-ac").textContent = D.veli ? "Veli tahminini değiştir" : "Veliyseniz: önce tahmininizi girin (1 dakika)";
+}
+function veliGoster(){
+  veliGecici = Object.assign({}, D.veli || {});
+  $("veli-liste").innerHTML = M.veli.map((v, i) => {
+    const solDuz = i % 2 === 0, sol = solDuz ? v.duzenleyen : v.kolay, sag = solDuz ? v.kolay : v.duzenleyen;
+    return `<div class="vsatir" data-o="${v.olcek}" data-sd="${solDuz?1:0}"><div class="iki"><div>Bazı çocuklar ${kucukTR(sol)}</div><div>Bazı çocuklar ise ${kucukTR(sag)}</div></div>
+      <div class="dort">${[0,1,2,3].map(k => `<button class="secim${k===0||k===3?" tam":""}" data-k="${k}">${VB[k]}</button>`).join("")}</div></div>`;
+  }).join("");
+  document.querySelectorAll(".vsatir").forEach(r => {
+    const o = r.dataset.o, sd = r.dataset.sd === "1";
+    const isaretle = () => r.querySelectorAll(".secim").forEach(b => {
+      const k = +b.dataset.k; b.classList.toggle("isaretli", veliGecici[o] === (sd ? 3 - k : k)); });
+    r.querySelectorAll(".secim").forEach(b => b.onclick = () => { const k = +b.dataset.k; veliGecici[o] = sd ? 3 - k : k; isaretle(); });
+    isaretle();
+  });
+  $("veli-uyari").textContent = ""; ekran("veli");
+}
+$("veli-ac").onclick = veliGoster;
+$("veli-vazgec").onclick = girisGoster;
+$("veli-kaydet").onclick = () => {
+  const eksik = M.veli.filter(v => veliGecici[v.olcek] === undefined).length;
+  if(eksik){ $("veli-uyari").textContent = `${eksik} satır boş kaldı.`; return; }
+  D.veli = veliGecici; kaydet(); girisGoster();
+};
+function veliPuan(){ if(!D.veli) return null; const t = {}; for(const k in D.veli) t[k] = D.veli[k] * 4; return t; }
+function veliKarsilastir(t, e){
+  const v = veliPuan(); if(!v) return "";
+  const ve = anEtiketi(v);
+  const satir = (ad, a, b) => `<tr><td>${ad}</td><td>${a}</td><td>${b}</td><td class="${a===b?"esit":""}">${a===b?"✓ aynı":"farklı"}</td></tr>`;
+  return `<h3 style="margin:18px 0 6px">Veli tahmini ile karşılaştırma</h3><div class="tablo-sar"><table class="kars"><tr><th></th><th>Veli tahmini</th><th>Testin sonucu</th><th></th></tr>
+    ${satir("Öğrenme anları", etiketYazi(ve), etiketYazi(e))}
+    ${["T1","T2","T3","T4"].map(k => satir(M.tuzaklar[k].ad, M.durumlar[tuzakDurum(v[k])], M.durumlar[tuzakDurum(t[k])])).join("")}</table></div>
+    <p style="color:var(--soluk);font-size:.85rem">Tahmin ile sonuç farklıysa bu, testin ya da tahminin yanlış olduğu anlamına gelmez; birlikte konuşmak için iyi bir başlangıçtır.</p>`;
+}
+
+/* ---- gönderme (Google Form) ---- */
+function yuk(){
+  const t = olcekPuan(), e = anEtiketi(t), v = veliPuan(), kod = {solTam:0, solBiraz:1, sagBiraz:2, sagTam:3};
+  return {surum: VERI.surum, bitis: D.bitis, basladi: D.basladi, ad: D.ad, sinif: D.sinif, puan: t, anlar: etiketYazi(e),
+    tuzak: Object.fromEntries(["T1","T2","T3","T4"].map(k => [k, tuzakDurum(t[k])])),
+    veli: v, veliAnlar: v ? etiketYazi(anEtiketi(v)) : null,
+    cevap: Q.map(q => D.cevap[q.no] !== undefined ? kod[D.cevap[q.no]] : "-").join(""),
+    sure: Q.map(q => D.sure[q.no] ?? null), ekran: innerWidth + "x" + innerHeight};
+}
+async function gonder(){
+  const g = VERI.gonder || {}; if(!g.form_url || !g.alan) return;
+  $("gonder-durum").textContent = "Cevaplar gönderiliyor…";
+  try{
+    await fetch(g.form_url, {method:"POST", mode:"no-cors", body: new URLSearchParams({[g.alan]: JSON.stringify(yuk())})});
+    D.gonderildi = true; kaydet();
+  }catch(err){}
+  gonderDurum();
+}
+function gonderDurum(){
+  const g = VERI.gonder || {}, el = $("gonder-durum");
+  if(!g.form_url){ el.textContent = ""; return; }
+  el.innerHTML = !D.onay ? "Bu test için gönderme onayı verilmedi; cevaplar yalnız bu cihazda."
+    : D.gonderildi ? "✓ Cevaplar araştırmaya gönderildi." : `Cevaplar gönderilemedi (internet bağlantısı?). <button class="dugme ikincil" onclick="gonder()">Yeniden gönder</button>`;
+}
+
 /* ---- başlangıç ---- */
 const prm = new URLSearchParams(location.search);
 if(prm.has("sifirla")){ try{ localStorage.removeItem(ANAHTAR); }catch(e){} }
@@ -282,9 +380,9 @@ if(prm.has("demo")){
   D.basladi = "onizleme"; D.sira = Math.min(Q.length, Math.max(1, Number(prm.get("soru"))||1)) - 1; ekran("soru"); soruGoster();
 } else {
   yukle();
-  if(D.bitti) sonucGoster();
+  if(D.bitti){ sonucGoster(); if(D.onay && !D.gonderildi) gonder(); }
   else if(D.basladi){ ekran("soru"); soruGoster(); }
-  else ekran("giris");
+  else girisGoster();
 }
 </script>
 </body>
